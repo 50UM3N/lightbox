@@ -4,12 +4,14 @@ const lightboxImages = document.querySelectorAll("#lightboxPic");
 let counter = 0;
 lightboxImages.forEach((image) => {
   image.setAttribute("data", counter++);
+
   image.addEventListener("click", (e) => {
     //main image background container
     const img = document.createElement("img");
     img.setAttribute("src", e.target.src);
     img.setAttribute("class", "a2");
     img.setAttribute("data", e.target.getAttribute("data"));
+    eventAdd(img);
     // main image
     const imgCont = document.createElement("div");
     imgCont.id = "a1";
@@ -33,23 +35,72 @@ lightboxImages.forEach((image) => {
     imgCont.appendChild(leftBtn);
     imgCont.appendChild(rightBtn);
     leftBtn.addEventListener("click", (e) => {
-      var currentImg = Number(e.target.previousSibling.getAttribute("data"));
-      var previousImg = currentImg == 0 ? 0 : currentImg - 1;
-      e.target.previousSibling.src = lightboxImages[previousImg].src;
-      e.target.previousSibling.setAttribute("data", previousImg);
-      console.log(e.target.previousSibling);
+      previousImage(e.target);
     });
     rightBtn.addEventListener("click", (e) => {
-      var totalImage = lightboxImages.length;
-      var currentImg = Number(
-        e.target.previousSibling.previousSibling.getAttribute("data")
-      );
-      var nextImg =
-        currentImg == totalImage - 1 ? totalImage - 1 : currentImg + 1;
-      e.target.previousSibling.previousSibling.src =
-        lightboxImages[nextImg].src;
-      e.target.previousSibling.previousSibling.setAttribute("data", nextImg);
-      console.log(e.target.previousSibling.previousSibling);
+      nextImage(e.target);
     });
   });
 });
+
+function nextImage(e) {
+  var totalImage = lightboxImages.length;
+  var currentImg = Number(
+    e.previousSibling.previousSibling.getAttribute("data")
+  );
+  var nextImg = currentImg == totalImage - 1 ? totalImage - 1 : currentImg + 1;
+  e.previousSibling.previousSibling.src = lightboxImages[nextImg].src;
+  e.previousSibling.previousSibling.setAttribute("data", nextImg);
+}
+
+function previousImage(e) {
+  var currentImg = Number(e.previousSibling.getAttribute("data"));
+  var previousImg = currentImg == 0 ? 0 : currentImg - 1;
+  e.previousSibling.src = lightboxImages[previousImg].src;
+  e.previousSibling.setAttribute("data", previousImg);
+}
+
+function eventAdd(gestureZone) {
+  let touchstartX = 0;
+  let touchstartY = 0;
+  let touchendX = 0;
+  let touchendY = 0;
+
+  console.log(gestureZone);
+  gestureZone.addEventListener(
+    "touchstart",
+    function (event) {
+      touchstartX = event.changedTouches[0].screenX;
+      touchstartY = event.changedTouches[0].screenY;
+    },
+    false
+  );
+
+  gestureZone.addEventListener(
+    "touchend",
+    function (event) {
+      touchendX = event.changedTouches[0].screenX;
+      touchendY = event.changedTouches[0].screenY;
+      handleGesture();
+    },
+    false
+  );
+
+  function handleGesture() {
+    if (
+      touchstartX - 30 > touchendX &&
+      touchstartY + 50 > touchendY &&
+      touchstartY - 50 < touchendY
+    ) {
+      nextImage(document.querySelector(".lightbox-btn-right"));
+    }
+
+    if (
+      touchendX > touchstartX + 30 &&
+      touchstartY - 50 < touchendY &&
+      touchstartY + 50 > touchendY
+    ) {
+      previousImage(document.querySelector(".lightbox-btn-left"));
+    }
+  }
+}
