@@ -50,62 +50,73 @@ function nextImage(e) {
   );
   var nextImg = currentImg == totalImage - 1 ? totalImage - 1 : currentImg + 1;
   const timer1 = setInterval(() => {
-    let opacity = window
+    let left = window
       .getComputedStyle(e.previousSibling.previousSibling)
-      .getPropertyValue("opacity");
-    console.log(opacity);
-    const cur = Number(opacity) - 0.1;
-    e.previousSibling.previousSibling.style.opacity = cur;
-    if (cur <= 0) {
+      .getPropertyValue("--PROP")
+      .split("%")[0];
+    left = Number(left);
+    console.log(left);
+    const cur = left + 10;
+    e.previousSibling.previousSibling.style.setProperty("--PROP", `${cur}%`);
+    if (cur >= 150) {
       clearInterval(timer1);
       e.previousSibling.previousSibling.src = lightboxImages[nextImg].src;
+      e.previousSibling.previousSibling.style.setProperty("--PROP", `-50%`);
       e.previousSibling.previousSibling.setAttribute("data", nextImg);
       const timer2 = setInterval(() => {
-        let opacity2 = window
+        let left = window
           .getComputedStyle(e.previousSibling.previousSibling)
-          .getPropertyValue("opacity");
-        console.log(opacity2);
-        const cur2 = Number(opacity2) + 0.1;
-        e.previousSibling.previousSibling.style.opacity = cur2;
-        if (cur2 >= 1) {
+          .getPropertyValue("--PROP")
+          .split("%")[0];
+        left = Number(left);
+        console.log(left);
+        const cur2 = left + 10;
+        e.previousSibling.previousSibling.style.setProperty(
+          "--PROP",
+          `${cur2}%`
+        );
+        if (cur2 >= 50) {
           clearInterval(timer2);
         }
       }, 10);
     }
   }, 10);
-  // e.previousSibling.previousSibling.src = lightboxImages[nextImg].src;
-  // e.previousSibling.previousSibling.setAttribute("data", nextImg);
+  console.log("asdas");
 }
 
 function previousImage(e) {
   var currentImg = Number(e.previousSibling.getAttribute("data"));
   var previousImg = currentImg == 0 ? 0 : currentImg - 1;
   const timer1 = setInterval(() => {
-    let opacity = window
+    let left = window
       .getComputedStyle(e.previousSibling)
-      .getPropertyValue("opacity");
-    console.log(opacity);
-    const cur = Number(opacity) - 0.1;
-    e.previousSibling.style.opacity = cur;
-    if (cur <= 0) {
+      .getPropertyValue("--PROP")
+      .split("%")[0];
+    left = Number(left);
+    console.log(left);
+    const cur = left - 10;
+    e.previousSibling.style.setProperty("--PROP", `${cur}%`);
+    if (cur <= -50) {
       clearInterval(timer1);
       e.previousSibling.src = lightboxImages[previousImg].src;
+      e.previousSibling.style.setProperty("--PROP", `150%`);
       e.previousSibling.setAttribute("data", previousImg);
       const timer2 = setInterval(() => {
-        let opacity2 = window
+        let left = window
           .getComputedStyle(e.previousSibling)
-          .getPropertyValue("opacity");
-        console.log(opacity2);
-        const cur2 = Number(opacity2) + 0.1;
-        e.previousSibling.style.opacity = cur2;
-        if (cur2 >= 1) {
+          .getPropertyValue("--PROP")
+          .split("%")[0];
+        left = Number(left);
+        console.log(left);
+        const cur2 = left - 10;
+        e.previousSibling.style.setProperty("--PROP", `${cur2}%`);
+        if (cur2 <= 50) {
           clearInterval(timer2);
         }
       }, 10);
     }
-  }, 20);
+  }, 10);
 }
-
 function eventAdd(gestureZone) {
   let touchstartX = 0;
   let touchstartY = 0;
