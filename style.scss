@@ -24,8 +24,14 @@ img#lightboxPic {
   justify-content: center;
   align-items: center;
   img {
+    // --PROP: calc(50% - 300px);
+    --PROP: 50%;
     width: 100%;
     max-width: 600px;
+    position: absolute;
+    opacity: 1;
+    transform: translateX(-50%);
+    left: var(--PROP);
   }
 }
 
