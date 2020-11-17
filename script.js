@@ -1,5 +1,20 @@
 console.log("Hello World 😉");
 
+function detectMob() {
+  const toMatch = [
+    /Android/i,
+    /webOS/i,
+    /iPhone/i,
+    /iPad/i,
+    /iPod/i,
+    /BlackBerry/i,
+    /Windows Phone/i,
+  ];
+
+  return toMatch.some((toMatchItem) => {
+    return navigator.userAgent.match(toMatchItem);
+  });
+}
 const lightboxImages = document.querySelectorAll("#lightboxPic");
 let counter = 0;
 lightboxImages.forEach((lightboxImage) => {
@@ -42,7 +57,7 @@ lightboxImages.forEach((lightboxImage) => {
   });
 });
 
-// lb002 = lightbox-btn lb003=lightbox-btn-left lb004= lightbox-btn-right
+// lb002 = lightbox-btn lb003 = lightbox-btn-left lb004 = lightbox-btn-right
 function btnCreate() {
   const leftBtn = document.createElement("button");
   const rightBtn = document.createElement("button");
@@ -50,6 +65,10 @@ function btnCreate() {
   rightBtn.classList.add("lb002");
   leftBtn.classList.add("lb003");
   rightBtn.classList.add("lb004");
+  if (detectMob()) {
+    leftBtn.classList.add("lb005");
+    rightBtn.classList.add("lb005");
+  }
   leftBtn.addEventListener("click", (e) => {
     previousImage(e.target.previousSibling);
   });
@@ -159,15 +178,12 @@ function eventAdd(gestureZone) {
   function handleGesture() {
     // left swipe
     if (startX - 30 > endX && startY + 50 > endY && startY - 50 < endY) {
-      previousImage(
-        document.querySelector(".lightbox-btn-left").previousSibling
-      );
+      previousImage(document.querySelector(".lb003").previousSibling);
     }
     // right swipe
     if (endX > startX + 30 && startY - 50 < endY && startY + 50 > endY) {
       nextImage(
-        document.querySelector(".lightbox-btn-right").previousSibling
-          .previousSibling
+        document.querySelector(".lb004").previousSibling.previousSibling
       );
     }
   }
