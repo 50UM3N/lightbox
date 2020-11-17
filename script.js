@@ -2,133 +2,146 @@ console.log("Hello World 😉");
 
 const lightboxImages = document.querySelectorAll("#lightboxPic");
 let counter = 0;
-lightboxImages.forEach((image) => {
-  image.setAttribute("data", counter++);
-
-  image.addEventListener("click", (e) => {
-    //main image background container
-    const img = document.createElement("img");
-    img.setAttribute("src", e.target.src);
-    img.setAttribute("class", "a2");
-    img.setAttribute("data", e.target.getAttribute("data"));
-    eventAdd(img);
-    // main image
-    const imgCont = document.createElement("div");
-    imgCont.id = "a1";
-    imgCont.setAttribute("class", "a1");
-    document.body.appendChild(imgCont);
-    // visible the image
-    imgCont.appendChild(img);
-    imgCont.classList.add("active");
-    // event listener
-    imgCont.addEventListener("click", (e) => {
+lightboxImages.forEach((lightboxImage) => {
+  lightboxImage.setAttribute("data", counter++);
+  lightboxImage.addEventListener("click", (e) => {
+    const singleImage = document.createElement("img");
+    singleImage.setAttribute("src", e.target.src);
+    singleImage.setAttribute("data", e.target.getAttribute("data"));
+    eventAdd(singleImage);
+    const imgBackground = document.createElement("div");
+    imgBackground.setAttribute("class", "lb001");
+    document.body.appendChild(imgBackground);
+    imgBackground.appendChild(singleImage);
+    // fade in animation
+    let timer = setInterval(() => {
+      const current = opacityAnimation(imgBackground, (position) => {
+        return position + 0.1;
+      });
+      if (current >= 1) {
+        clearInterval(timer);
+      }
+    }, 15);
+    imgBackground.addEventListener("click", (e) => {
       if (e.target != e.currentTarget) return;
-      imgCont.remove();
+      // fade out animation
+      let timer = setInterval(() => {
+        const current = opacityAnimation(imgBackground, (position) => {
+          return position - 0.1;
+        });
+        if (current <= 0) {
+          imgBackground.remove();
+          clearInterval(timer);
+        }
+      }, 15);
     });
-    // left btn
-    const leftBtn = document.createElement("button");
-    const rightBtn = document.createElement("button");
-    leftBtn.classList.add("lightbox-btn");
-    rightBtn.classList.add("lightbox-btn");
-    leftBtn.classList.add("lightbox-btn-left");
-    rightBtn.classList.add("lightbox-btn-right");
-    imgCont.appendChild(leftBtn);
-    imgCont.appendChild(rightBtn);
-    leftBtn.addEventListener("click", (e) => {
-      previousImage(e.target);
-    });
-    rightBtn.addEventListener("click", (e) => {
-      nextImage(e.target);
-    });
+    // left btn and right btn create and add to a event
+    const { leftBtn, rightBtn } = btnCreate();
+    imgBackground.appendChild(leftBtn);
+    imgBackground.appendChild(rightBtn);
   });
 });
 
-function nextImage(e) {
+// lb002 = lightbox-btn lb003=lightbox-btn-left lb004= lightbox-btn-right
+function btnCreate() {
+  const leftBtn = document.createElement("button");
+  const rightBtn = document.createElement("button");
+  leftBtn.classList.add("lb002");
+  rightBtn.classList.add("lb002");
+  leftBtn.classList.add("lb003");
+  rightBtn.classList.add("lb004");
+  leftBtn.addEventListener("click", (e) => {
+    previousImage(e.target.previousSibling);
+  });
+  rightBtn.addEventListener("click", (e) => {
+    nextImage(e.target.previousSibling.previousSibling);
+  });
+  return { leftBtn, rightBtn };
+}
+
+// next image for right btn click and right swipe
+function nextImage(element) {
   var totalImage = lightboxImages.length;
-  var currentImg = Number(
-    e.previousSibling.previousSibling.getAttribute("data")
-  );
+  var currentImg = Number(element.getAttribute("data"));
   var nextImg = currentImg == totalImage - 1 ? totalImage - 1 : currentImg + 1;
-  const timer1 = setInterval(() => {
-    let left = window
-      .getComputedStyle(e.previousSibling.previousSibling)
-      .getPropertyValue("--PROP")
-      .split("%")[0];
-    left = Number(left);
-    console.log(left);
-    const cur = left + 10;
-    e.previousSibling.previousSibling.style.setProperty("--PROP", `${cur}%`);
+  const time = 15;
+  const offset = 10;
+  const outerInterval = setInterval(() => {
+    const cur = slider(element, (position) => {
+      return position + offset;
+    });
     if (cur >= 150) {
-      clearInterval(timer1);
-      e.previousSibling.previousSibling.src = lightboxImages[nextImg].src;
-      e.previousSibling.previousSibling.style.setProperty("--PROP", `-50%`);
-      e.previousSibling.previousSibling.setAttribute("data", nextImg);
-      const timer2 = setInterval(() => {
-        let left = window
-          .getComputedStyle(e.previousSibling.previousSibling)
-          .getPropertyValue("--PROP")
-          .split("%")[0];
-        left = Number(left);
-        console.log(left);
-        const cur2 = left + 10;
-        e.previousSibling.previousSibling.style.setProperty(
-          "--PROP",
-          `${cur2}%`
-        );
+      clearInterval(outerInterval);
+      element.src = lightboxImages[nextImg].src;
+      element.style.setProperty("--PROP", `-50%`);
+      element.setAttribute("data", nextImg);
+      const innerInterval = setInterval(() => {
+        const cur2 = slider(element, (position) => {
+          return position + 10;
+        });
         if (cur2 >= 50) {
-          clearInterval(timer2);
+          clearInterval(innerInterval);
         }
-      }, 10);
+      }, time);
     }
-  }, 10);
-  console.log("asdas");
+  }, time);
 }
 
-function previousImage(e) {
-  var currentImg = Number(e.previousSibling.getAttribute("data"));
+function opacityAnimation(element, callback) {
+  let opacity = Number(
+    window.getComputedStyle(element).getPropertyValue("opacity")
+  );
+  const current = callback(opacity);
+  element.style.opacity = current;
+  return current;
+}
+
+// previous image for left btn click and left swipe
+function previousImage(element) {
+  var currentImg = Number(element.getAttribute("data"));
   var previousImg = currentImg == 0 ? 0 : currentImg - 1;
-  const timer1 = setInterval(() => {
-    let left = window
-      .getComputedStyle(e.previousSibling)
-      .getPropertyValue("--PROP")
-      .split("%")[0];
-    left = Number(left);
-    console.log(left);
-    const cur = left - 10;
-    e.previousSibling.style.setProperty("--PROP", `${cur}%`);
+  const time = 15;
+  const offset = 10;
+  const outerInterval = setInterval(() => {
+    const cur = slider(element, (position) => {
+      return position - 10;
+    });
     if (cur <= -50) {
-      clearInterval(timer1);
-      e.previousSibling.src = lightboxImages[previousImg].src;
-      e.previousSibling.style.setProperty("--PROP", `150%`);
-      e.previousSibling.setAttribute("data", previousImg);
-      const timer2 = setInterval(() => {
-        let left = window
-          .getComputedStyle(e.previousSibling)
-          .getPropertyValue("--PROP")
-          .split("%")[0];
-        left = Number(left);
-        console.log(left);
-        const cur2 = left - 10;
-        e.previousSibling.style.setProperty("--PROP", `${cur2}%`);
+      clearInterval(outerInterval);
+      element.src = lightboxImages[previousImg].src;
+      element.style.setProperty("--PROP", `150%`);
+      element.setAttribute("data", previousImg);
+      const innerInterval = setInterval(() => {
+        const cur2 = slider(element, (position) => {
+          return position - offset;
+        });
         if (cur2 <= 50) {
-          clearInterval(timer2);
+          clearInterval(innerInterval);
         }
-      }, 10);
+      }, time);
     }
-  }, 10);
+  }, time);
 }
-function eventAdd(gestureZone) {
-  let touchstartX = 0;
-  let touchstartY = 0;
-  let touchendX = 0;
-  let touchendY = 0;
 
-  // console.log(gestureZone);
+function slider(element, callback) {
+  const position = Number(
+    window.getComputedStyle(element).getPropertyValue("--PROP").split("%")[0]
+  );
+  const current = callback(position);
+  element.style.setProperty("--PROP", `${current}%`);
+  return current;
+}
+
+function eventAdd(gestureZone) {
+  let startX = 0;
+  let startY = 0;
+  let endX = 0;
+  let endY = 0;
   gestureZone.addEventListener(
     "touchstart",
     function (event) {
-      touchstartX = event.changedTouches[0].screenX;
-      touchstartY = event.changedTouches[0].screenY;
+      startX = event.changedTouches[0].screenX;
+      startY = event.changedTouches[0].screenY;
     },
     false
   );
@@ -136,28 +149,26 @@ function eventAdd(gestureZone) {
   gestureZone.addEventListener(
     "touchend",
     function (event) {
-      touchendX = event.changedTouches[0].screenX;
-      touchendY = event.changedTouches[0].screenY;
+      endX = event.changedTouches[0].screenX;
+      endY = event.changedTouches[0].screenY;
       handleGesture();
     },
     false
   );
 
   function handleGesture() {
-    if (
-      touchstartX - 30 > touchendX &&
-      touchstartY + 50 > touchendY &&
-      touchstartY - 50 < touchendY
-    ) {
-      nextImage(document.querySelector(".lightbox-btn-right"));
+    // left swipe
+    if (startX - 30 > endX && startY + 50 > endY && startY - 50 < endY) {
+      previousImage(
+        document.querySelector(".lightbox-btn-left").previousSibling
+      );
     }
-
-    if (
-      touchendX > touchstartX + 30 &&
-      touchstartY - 50 < touchendY &&
-      touchstartY + 50 > touchendY
-    ) {
-      previousImage(document.querySelector(".lightbox-btn-left"));
+    // right swipe
+    if (endX > startX + 30 && startY - 50 < endY && startY + 50 > endY) {
+      nextImage(
+        document.querySelector(".lightbox-btn-right").previousSibling
+          .previousSibling
+      );
     }
   }
 }
